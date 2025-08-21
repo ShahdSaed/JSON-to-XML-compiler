@@ -14,62 +14,138 @@ using namespace std;
 bool valid = true;
 
 // Scanner
-struct TokenRule {
-    string name;
-    regex pattern;
+struct Transition{
+    string curstate;
+    char alpha;
+    string nextstate;
 };
-vector<TokenRule> loadTokenRules(const string& filename) {
-    vector<TokenRule> rules;
-    ifstream file(filename);
-    string name, pattern;
+class Scannar{
+    private:
+    vector<string> states;
+    vector<char> alphabet;
+    vector<string> finals;
+    string start_state,error_state,current_state,previous_state;
+    vector<Transition> transition;
+    map<string,string> tokens;
 
-    while (file >> name) {
-        file >> ws;
-        getline(file, pattern);
-        rules.push_back({name, regex(pattern)});
-    }
+    public:
+    // Constructor
+    Scannar(string stat,string alph,string trans,string tok){
+        // Open files
+        ifstream instates(stat),inalphabet(alph),intransition(trans),intekens(tok);
+        string line;
 
-    return rules;
-}
-void scanInput(const string& inputFilename, const vector<TokenRule>& rules, const string& outputFilename) {
-    ifstream input(inputFilename);
-    ofstream output(outputFilename);
-    string line;
-    int lineNum = 1;
-    bool errorFound = false;
-
-    while (getline(input, line)) {
-        size_t i = 0;
-        while (i < line.size()) {
-            bool matched = false;
-            for (const auto& rule : rules) {
-                smatch match;
-                string substr = line.substr(i);
-                if (regex_search(substr, match, rule.pattern) && match.position() == 0) {
-                    if (rule.name != "WHITESPACE") {
-                        output << rule.name << " " << match.str() << endl;
-                    }
-                    i += match.length();
-                    matched = true;
-                    break;
-                }
-            }
-            if (!matched) {
-                output << "ERROR: Unknown token at line " << lineNum << " near: " << line[i] << endl;
-                errorFound = true;
-                break;
+        // Read all states
+        if(getline(instates,line)){
+            stringstream ss(line);
+            string state;
+            while (getline(ss, state, ',')) {
+                states.push_back(state);
             }
         }
-        if (errorFound) break;
-        lineNum++;
-    }
+        // Read start state
+        if (getline(instates, start_state));
+        // Read final states
+        if (getline(instates, line)){
+            stringstream ss(line);
+            string state;
+            while (getline(ss, state, ',')) {
+                finals.push_back(state);
+            }
+        }
+        // Read error state
+        if (getline(instates, error_state));
+        // Read alphabet
+        if(getline(inalphabet,line)){
+            stringstream ss(line);
+            char symbol;
+            while (ss >> symbol) {
+                alphabet.push_back(symbol);
+            }
+        }
 
-    if (!errorFound) {
-        cout << "ACCEPTED" << endl;
-    } else {
-        valid = false;
+        // Read transitions
+        while (getline(intransition, line)) {
+            stringstream ss(line);
+            string cur, next;
+            char input;
+            ss >> cur >> input >> next;
+            transition.push_back({cur, input, next});
+        }
+
+        // Read tokens
+        while(getline(intekens,line)){
+            stringstream ss(line);
+            string key, value;
+            ss >> key >> value;
+            tokens[key] = value;
+        }
+        instates.close();
+        inalphabet.close();
+        intransition.close();
+        intekens.close();
     }
-}
+    // Scannar start
+    void scan(string infile,string outfile){
+        ifstream in(infile);
+        ofstream out(outfile);
+        current_state=start_state;
+        char c;
+        string token="",next_state;
+        bool rollback = false;
+        while(rollback || in>>c){
+            if(rollback){
+               rollback = false;
+            }
+            previous_state=current_state;
+            next_state=getstate(previous_state,c);
+            if(next_state != error_state){
+                current_state=next_state;
+                token+=c;
+            } else {
+                rollback = true;
+                if(find(finals.begin(), finals.end(), previous_state)!=finals.end()){
+                    if(tokens.count(previous_state)){
+                        out<<tokens[previous_state]<<" "<<token<<endl;
+                    } else {
+                        out<<c<<" error unknown token!"<<endl;
+                        return;
+                    }
+                } else {
+                    out<<c<<" error unknown token!"<<endl;
+                    return;
+                }
+                token="";
+                current_state=start_state;
+            }
+
+        }
+        if (!token.empty()) {
+            if (find(finals.begin(), finals.end(), current_state) != finals.end()) {
+                if (tokens.count(current_state)) {
+                    out << token << " " << tokens[current_state] << endl;
+                } else {
+                    out << token << " error unknown token!" << endl;
+                    return;
+                }
+            } else {
+                out << token << " error unknown token!" << endl;
+                return;
+            }
+        }
+        in.close();
+        out.close();
+    }
+    // Get next state based on input
+    string getstate(string state,char input){
+        for (const auto& trans : transition) {
+            if (trans.curstate == state && trans.alpha == input) {
+                return trans.nextstate;
+            }
+        }
+        return error_state;
+    }
+};
 
 // create first and follow files
 map<string, vector<vector<string>>> grammarr;
@@ -719,8 +795,9 @@ string parseJSONtoXML(stringstream& ss, int level, const string& currentTag) {
 
 
 int main() {
-    vector<TokenRule> rules = loadTokenRules("tokens.txt");
-    scanInput("json.txt", rules, "scanner_output.txt");
+    Scannar scanner("states.txt", "ahphabet.txt", "transition.txt", "tokens.txt");
+    scanner.scan("json.txt", "scanner_output.txt");
+    cout << "Scanning complete. Check scanner_output.txt" << endl;
 
 
     readGrammar("grammar.txt");

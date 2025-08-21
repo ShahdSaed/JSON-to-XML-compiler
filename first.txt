@@ -1,15 +1,15 @@
 Array [ 
-ArrayT " [ ] false null number true { 
+ArrayT [ ] false null number string true { 
 Boolean false true 
 Json [ { 
-Member " 
-Members " 
+Member string 
+Members string 
 MembersT , e 
 Null null 
 Number number 
 Object { 
-ObjectT " } 
-String " 
-Value " [ false null number true { 
-Values " [ false null number true { 
+ObjectT string } 
+String string 
+Value [ false null number string true { 
+Values [ false null number string true { 
 ValuesT , e 

@@ -1,4 +1,41 @@
 <root>
-  <name>farida</name>
-  <age>22</age>
+  <company>
+    <name>Tech Solutions</name>
+    <founded>
+      <@year>2015</@year>
+      <@country>Egypt</@country>
+    </founded>
+    <employees>
+      <employee>
+        <@id>1</@id>
+        <name>Sayed</name>
+        <role>Backend Developer</role>
+        <skills>
+          <skill>Java</skill>
+          <skill>C++</skill>
+          <skill>SQL</skill>
+        </skills>
+      </employee>
+      <employee>
+        <@id>2</@id>
+        <name>Omar</name>
+        <role>Data Scientist</role>
+        <skills>
+          <skill>Python</skill>
+          <skill>R</skill>
+          <skill>Machine Learning</skill>
+        </skills>
+      </employee>
+    </employees>
+    <projects>
+      <project>
+        <title>AI Chatbot</title>
+        <status>Ongoing</status>
+      </project>
+      <project>
+        <title>E-commerce Platform</title>
+        <status>Completed</status>
+      </project>
+    </projects>
+  </company>
 </root>
