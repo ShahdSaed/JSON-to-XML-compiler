@@ -132,7 +132,7 @@ public class gui extends javax.swing.JFrame {
             StringBuilder result = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                result.append(line).append("\\n");
+                result.append(line).append("\n");
             }
 
             int exitCode = process.waitFor();
@@ -143,7 +143,7 @@ public class gui extends javax.swing.JFrame {
                     Scanner scanner = new Scanner(xmlFile);
                     StringBuilder xmlContent = new StringBuilder();
                     while (scanner.hasNextLine()) {
-                        xmlContent.append(scanner.nextLine()).append("\\n");
+                        xmlContent.append(scanner.nextLine()).append("\n");
                     }
                     scanner.close();
                     xmlcontent.setText(xmlContent.toString());
@@ -151,7 +151,7 @@ public class gui extends javax.swing.JFrame {
                     xmlcontent.setText("XML file not generated");
                 }
             } else {
-                xmlcontent.setText("Error in conversion. Exit code: " + exitCode + "\\n" + result.toString());
+                xmlcontent.setText("Error in conversion. Exit code: " + exitCode + "\n" + result.toString());
             }
         } catch (Exception ex) {
             xmlcontent.setText("Exception: " + ex.getMessage());

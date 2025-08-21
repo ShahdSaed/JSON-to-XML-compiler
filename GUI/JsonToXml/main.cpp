@@ -395,161 +395,6 @@ public:
     }
 };
 
-
-// Recursive Descent parser
-/*
-struct Token{
-    string type;
-    string value;
-};
-vector<Token> tokens;
-int posCurrentToken=0;
-void loadTokens(const string& filename) {
-    ifstream file(filename);
-    if (!file) {
-        cerr << "Cannot open token file!" << endl;
-        return;
-    }
-
-    tokens.clear();
-    string type, value;
-    while (file >> type >> value) {
-        if (type == "ACCEPTED") break;
-        tokens.push_back({type, value});
-    }
-    file.close();
-}
-Token CurrentToken() {
-    if(posCurrentToken < tokens.size()) {
-        return tokens[posCurrentToken];
-    }
-    return {"$ ","$"};
-}
-void match(string  expected) {
-    if(CurrentToken().type == expected) {
-        cout<<"matched "<<expected<<"\n";
-        posCurrentToken++;
-    } else {
-        cout<< "Syntax Error: Expected token '" << expected << "' but found '" << CurrentToken().type
-             << "' with value '" << CurrentToken().value << "'" << endl;
-    }
-}
-void parseJson();
-void parseObject();
-void parseObjectT();
-void parseMembers();
-void parseMembersT();
-void parseMember();
-void parseArray();
-void parseArrayT();
-void parseValues();
-void parseValuesT();
-void parseValue();
-void parseString();
-void parseNumber();
-void parseBoolean();
-void parseNull();
-
-void parseJson() {
-    if(CurrentToken().type =="{") {
-        parseObject();
-    } else if(CurrentToken().type =="[") {
-        parseArray();
-    } else {
-        cout<<"Error ,Json must start with { or [";
-        exit(1);
-    }
-}
-void parseObject() {
-    match("{");
-    parseObjectT();
-}
-void parseObjectT() {
-    if(CurrentToken().type== "}") {
-        match("}");
-    } else if(CurrentToken().type== "\"") {
-        parseMembers();
-        match("}");
-    } else {
-        cout<<"unexpected token must be } or \" "<<"\n";
-    }
-}
-void parseMembers() {
-    parseMember();
-    parseMembersT();
-}
-void parseMembersT() {
-    if(CurrentToken().type== ",") {
-        match(",");
-        parseMember();
-        parseMembersT();
-    }
-}
-void parseMember() {
-    parseString();
-    match(":");
-    parseValue();
-}
-void parseArray() {
-    match("[");
-    parseArrayT();
-}
-void parseArrayT() {
-    if(CurrentToken().type== "]") {
-        match("]");
-    } else {
-        parseValues();
-        match("]");
-    }
-}
-void parseValues() {
-    parseValue();
-    parseValuesT();
-}
-void parseValuesT() {
-    if(CurrentToken().type== ",") {
-        match(",");
-        parseValue();
-        parseValuesT();
-    }
-}
-void parseValue() {
-    if(CurrentToken().type=="\"") {
-        parseString();
-    } else if(CurrentToken().type=="number") {
-        parseNumber();
-    } else if(CurrentToken().type=="{") {
-        parseObject();
-    } else if(CurrentToken().type=="[") {
-        parseArray();
-    } else if(CurrentToken().type=="null") {
-        parseNull();
-    } else if(CurrentToken().type=="true" || CurrentToken().type=="false" ) {
-        parseBoolean();
-    } else {
-        cout<<"error token dont match";
-    }
-}
-void parseString() {
-    match("\"");
-    match("string");
-    match("\"");
-}
-void parseNumber() {
-    match("number");
-}
-void parseBoolean() {
-    if(CurrentToken().type=="true") {
-        match("true");
-    } else if(CurrentToken().type=="false") {
-        match("false");
-    }
-}
-void parseNull() {
-    match("null");
-}
-*/
-
 // parser LL-1
 class LL1_parser{
     private:
@@ -700,12 +545,12 @@ class LL1_parser{
             }
         }
         if(tokens.top()=="$"&&temp_stack.top()=="$"){
-            out<<"accepted!!";
-            cout <<"accepted!!"<<endl;
+            out<<"accepted!!\n";
+            cout <<"accepted!!\n";
         } else {
             valid = false;
             out<<"not accepted!!";
-            cout<<"not accepted!!"<<endl;
+            cout<<"not accepted!!";
         }
         out.close();
     }
@@ -771,8 +616,6 @@ class LL1_parser{
     }
 };
 
-
-
 // JSON file to XML file
 string indent(int level) {
     return string(level * 2, ' ');
@@ -822,10 +665,7 @@ string parseArray(stringstream& ss, int level, const string& tag) {
     while (ss >> ch) {
         if (ch == ']') break;
         ss.putback(ch);
-
-        xml += indent(level) + "<" + tag + ">\n";
-        xml += parseValue(ss, level + 1, "item");
-        xml += indent(level) + "</" + tag + ">\n";
+        xml += parseValue(ss, level, tag);
 
         ss >> ch;
         if (ch != ',' && ch != ']') ss.putback(ch);
@@ -878,10 +718,35 @@ string parseJSONtoXML(stringstream& ss, int level, const string& currentTag) {
 }
 
 
-int main() {
-    vector<TokenRule> rules = loadTokenRules("tokens.txt");
-    scanInput("json.txt", rules, "scanner_output.txt");
 
+int main(int argc, char* argv[]) {
+    string inputFile = "json.txt"; // default
+    
+    if (argc > 1) { 
+        inputFile = argv[1];
+    }
+
+    // Check required files exist
+    vector<string> requiredFiles = {"tokens.txt", "grammar.txt"};
+    for (const string& file : requiredFiles) {
+        ifstream check(file);
+        if (!check) {
+            cerr << "Error: Required file '" << file << "' not found!" << endl;
+            return 1;
+        }
+        check.close();
+    }
+
+    // Check input file exists
+    ifstream checkInput(inputFile);
+    if (!checkInput) {
+        cerr << "Error: Input file '" << inputFile << "' not found!" << endl;
+        return 1;
+    }
+    checkInput.close();
+
+    vector<TokenRule> rules = loadTokenRules("tokens.txt");
+    scanInput(inputFile, rules, "scanner_output.txt");
 
     readGrammar("grammar.txt");
     computeFirst();
@@ -893,25 +758,14 @@ int main() {
     ParsingTable tab1("first.txt", "follow.txt", "grammar.txt");
     tab1.build_parsing_table("parse_table.txt");
     cout << "parsing table is done!" << endl;
-    cout<<"\n\n\n";
-
-    //loadTokens("scanner_output.txt");
-    //parseJson();
-    //if (CurrentToken().type=="$") {
-        //cout << "VALID JSON! All tokens matched." << endl;
-        //test = true;
-
-    //} else {
-        //cout << "INVALID JSON!  unexpected token." << endl;
-    //}
-
 
     LL1_parser pars("scanner_output.txt","parse_table.txt","grammar.txt");
     pars.check_parser("output.txt");
-    if (valid){
-        ifstream input("json.txt");
+
+    if (valid) {
+        ifstream input(inputFile);
         if (!input) {
-            cerr << " Error: input.json not found\n";
+            cerr << "Error: " << inputFile << " not found\n";
             return 1;
         }
 
@@ -928,6 +782,6 @@ int main() {
         output.close();
     }
 
-    system("pause");
+    // Removed system("pause") to prevent crashes
     return 0;
 }

@@ -1,4 +1,11 @@
 <root>
-  <name>farida</name>
-  <age>22</age>
+  <person>
+    <name>Sayed</name>
+    <age>23</age>
+    <skills>
+      <skill>Java</skill>
+      <skill>C++</skill>
+      <skill>Python</skill>
+    </skills>
+  </person>
 </root>

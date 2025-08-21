@@ -1,0 +1,41 @@
+{
+  "company": {
+    "name": "Tech Solutions",
+    "founded": {
+      "@year": "2015",
+      "@country": "Egypt"
+    },
+    "employees": {
+      "employee": [
+        {
+          "@id": "1",
+          "name": "Sayed",
+          "role": "Backend Developer",
+          "skills": {
+            "skill": ["Java", "C++", "SQL"]
+          }
+        },
+        {
+          "@id": "2",
+          "name": "Omar",
+          "role": "Data Scientist",
+          "skills": {
+            "skill": ["Python", "R", "Machine Learning"]
+          }
+        }
+      ]
+    },
+    "projects": {
+      "project": [
+        {
+          "title": "AI Chatbot",
+          "status": "Ongoing"
+        },
+        {
+          "title": "E-commerce Platform",
+          "status": "Completed"
+        }
+      ]
+    }
+  }
+}
