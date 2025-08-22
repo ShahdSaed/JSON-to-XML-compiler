@@ -1,9 +1,4 @@
 {
-  "person": {
-    "name": "Sayed",
-    "age": "23",
-    "skills": {
-      "skill": ["Java", "C++", "Python"]
-    }
-  }
+  "name":"farida",
+  "age":22
 }
